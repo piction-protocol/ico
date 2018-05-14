@@ -1,0 +1,19 @@
+{
+  "name": "token",
+  "version": "0.0.1",
+  "description": "This is contract of Pixel token.",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "openzeppelin-solidity": "git+https://github.com/OpenZeppelin/openzeppelin-solidity.git"
+  },
+  "devDependencies": {
+    "truffle-hdwallet-provider-privkey": "0.2.0"
+  }
+}
