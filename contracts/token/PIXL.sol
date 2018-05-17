@@ -17,11 +17,11 @@ contract PIXL is StandardToken, OwnableToken {
     // (to prevent OTC before the token to be listed on exchanges)
     bool isTransferable = false;
 
-    constructor(uint256 _totalSupply) public {                        
-        require(_totalSupply > 0);
+    constructor(uint256 initialSupply) public {                        
+        require(initialSupply > 0);
 
-        totalSupply = _totalSupply;
-        balances[msg.sender] = _totalSupply;        
+        totalSupply = initialSupply.mul(10 ** uint256(decimals));
+        balances[msg.sender] = totalSupply;
     }
 
     function unlock() external onlyOwner {
