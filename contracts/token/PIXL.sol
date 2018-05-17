@@ -6,30 +6,22 @@ import "./OwnableToken.sol";
 
 contract PIXL is StandardToken, OwnableToken {
     using SafeMath for uint256;    
-
-    // Token Distribution Rate
-    uint256 public constant SUM = 100000000;   // totalSupply
-    uint256 public constant DISTRIBUTION = 50000000; // distribution
-    uint256 public constant DEVELOPERS = 50000000;   // developer
-
+    
     // Token Information
     string public constant name = "Pixel";
     string public constant symbol = "PIXL";
     uint256 public constant decimals = 18;
-    uint256 public totalSupply = SUM.mul(10 ** uint256(decimals));
+    uint256 public totalSupply;
 
     // token is non-transferable until owner calls unlock()
     // (to prevent OTC before the token to be listed on exchanges)
     bool isTransferable = false;
 
-    constructor(address _dev) public {
-        require(_dev != address(0));
-        require(DISTRIBUTION + DEVELOPERS == SUM);
+    constructor(uint256 _totalSupply) public {                        
+        require(_totalSupply > 0);
 
-        balances[msg.sender] = DISTRIBUTION.mul(10 ** uint256(decimals));
-
-        balances[_dev] = DEVELOPERS.mul(10 ** uint256(decimals));
-        emit Transfer(address(0), _dev, balances[_dev]);
+        totalSupply = _totalSupply;
+        balances[msg.sender] = _totalSupply;        
     }
 
     function unlock() external onlyOwner {
