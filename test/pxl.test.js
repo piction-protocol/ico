@@ -1,11 +1,10 @@
 var PXL = artifacts.require("PXL");
-const decimals = Math.pow(10, 18);
 
 contract('PXL', function(accounts) {
   const owner = accounts[0];
   const developer = accounts[1];
 
-  const decimals = 18;
+  const decimals = Math.pow(10, 18);
   const initialBalance = 10000;
 
   let token;
