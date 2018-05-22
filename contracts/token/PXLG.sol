@@ -4,12 +4,13 @@ import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./OwnableToken.sol";
 
-contract PXL is StandardToken, OwnableToken {
+contract PXLG is StandardToken, OwnableToken {
     using SafeMath for uint256;
 
     // Token Information
-    string public constant name = "Pixel";
-    string public constant symbol = "PXL";
+    string public constant name = "Pixel Genesis";
+    string public constant symbol = "PXLG";
+
     uint256 public constant decimals = 18;
     uint256 public totalSupply;
 
@@ -22,6 +23,12 @@ contract PXL is StandardToken, OwnableToken {
 
         totalSupply = initialSupply;
         balances[msg.sender] = totalSupply;
+
+        Transfer(address(0), msg.sender, totalSupply);
+    }
+
+    function() public payable {
+        revert();
     }
 
     function unlock() external onlyOwner {
