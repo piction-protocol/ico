@@ -19,7 +19,7 @@ contract('PXL', function (accounts) {
 
 
     beforeEach("setup contract for each test", async () => {
-        token = await PXL.new(initialBalance, { from: owner });
+        token = await PXL.new(initialBalance, {from: owner});
     });
 
     it("Check Initial balance in Owner account.", async () => {
@@ -33,11 +33,11 @@ contract('PXL', function (accounts) {
         await token.transfer(developer, sendPXL);
         const after = await token.balanceOf.call(owner);
         const devBalance = await token.balanceOf.call(developer);
-        
+
         console.log("Owner address :", owner);
         console.log("developer address :", developer);
 
         before.minus(after).should.be.bignumber.equal(sendPXL);
         devBalance.should.be.bignumber.equal(sendPXL);
-      });
+    });
 });
