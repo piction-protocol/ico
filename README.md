@@ -43,11 +43,11 @@ $ truffle migrate --network development --reset
 ```
 - Deploy on ropsten testnet
 ```
-$ truffle migrate --network testnet_token --reset
+$ truffle migrate --network ropsten --reset
 ```
 - Deploy on mainnet
 ```
-$ truffle migrate --network mainnet_token
+$ truffle migrate --network mainnet
 ```
 
 ## Test
