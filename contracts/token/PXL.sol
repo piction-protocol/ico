@@ -22,6 +22,12 @@ contract PXL is StandardToken, OwnableToken {
 
         totalSupply = initialSupply;
         balances[msg.sender] = totalSupply;
+
+        Transfer(address(0), msg.sender, initialSupply);
+    }
+
+    function() public payable {
+        revert();
     }
 
     function unlock() external onlyOwner {
@@ -38,31 +44,22 @@ contract PXL is StandardToken, OwnableToken {
         return super.transfer(_to, _value);
     }
 
-    //////////////////////
-    //  mint and burn   //
-    //////////////////////
-    function mint(address _to, uint256 _amount) onlyOwner public returns (bool) {
-        require(_to != address(0));
-        require(_amount >= 0);
-
+    function mint(uint256 _amount) onlyOwner public returns (bool) {
         totalSupply = totalSupply.add(_amount);
-        balances[_to] = balances[_to].add(_amount);
+        balances[msg.sender] = balances[msg.sender].add(_amount);
 
-        Mint(_to, _amount);
-        Transfer(address(0), _to, _amount);
-
+        Mint(msg.sender, _amount);
+        Transfer(address(0), msg.sender, _amount);
         return true;
     }
 
     function burn(uint256 _amount) onlyOwner public {
-        require(_amount >= 0);
         require(_amount <= balances[msg.sender]);
 
         totalSupply = totalSupply.sub(_amount);
         balances[msg.sender] = balances[msg.sender].sub(_amount);
 
         Burn(msg.sender, _amount);
-        Transfer(msg.sender, address(0), _amount);
     }
 
     event Mint(address indexed _to, uint256 _amount);
