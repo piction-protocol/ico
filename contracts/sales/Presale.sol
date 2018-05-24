@@ -19,12 +19,13 @@ contract Presale is Ownable {
 
     bool public paused;
     bool public ignited;
+    bool public finalized;
 
     address public wallet;
-
     Whitelist public whiteList;
-
     ERC20 public token;
+
+    mapping(address => uint256) public buyers;
 
     constructor (
         uint256 _maxcap,
@@ -44,11 +45,8 @@ contract Presale is Ownable {
         exceed = _exceed;
         minimum = _minimum;
         rate = _rate;
-
         wallet = _wallet;
-
         token = ERC20(_token);
-
         whiteList = Whitelist(_whitelist);
     }
 
@@ -56,26 +54,19 @@ contract Presale is Ownable {
         collect();
     }
 
-    event Change(address _addr, string _name);
-
     function setWhitelist(address _whitelist) external onlyOwner {
         require(_whitelist != address(0));
 
         whiteList = Whitelist(_whitelist);
-        emit Change(_whitelist, "whitelist");
+        emit ChangeExternalAddress(_whitelist, "whitelist");
     }
 
     function setWallet(address _wallet) external onlyOwner {
         require(_wallet != address(0));
 
         wallet = _wallet;
-        emit Change(_wallet, "wallet");
+        emit ChangeExternalAddress(_wallet, "wallet");
     }
-
-    event Pause();
-    event Resume();
-    event Ignite();
-    event Extinguish();
 
     function pause() external onlyOwner {
         paused = true;
@@ -96,11 +87,6 @@ contract Presale is Ownable {
         ignited = false;
         emit Extinguish();
     }
-
-    event Purchase(address indexed _buyer, uint256 _purchased, uint256 _refund, uint256 _tokens);
-    event ChangeBuyer(address indexed _from, address indexed _to);
-
-    mapping(address => uint256) public buyers;
 
     function collect() public payable {
         address buyer = msg.sender;
@@ -131,41 +117,31 @@ contract Presale is Ownable {
         }
     }
 
-    function changeBuyerAddress(address _from, address _to) external onlyOwner {
+    function buyerAddressTransfer(address _from, address _to) external onlyOwner {
         require(_from != address(0));
         require(_to != address(0));
+        require(whiteList.whitelist(_from));
+        require(whiteList.whitelist(_to));
         require(buyers[_from] > 0);
         require(buyers[_to] == 0);
 
         buyers[_to] = buyers[_from];
         buyers[_from] = 0;
 
-        emit ChangeBuyer(_from, _to);
+        emit BuyerAddressTransfer(_from, _to);
     }
 
     function getPurchaseAmount(address _buyer, uint256 _amount) private view returns (uint256, uint256) {
         uint256 d1 = maxcap.sub(weiRaised);
         uint256 d2 = exceed.sub(buyers[_buyer]);
+        uint256 possibleAmount = min(min(d1, d2), _amount);
 
-        uint256 d = (d1 > d2) ? d2 : d1;
-
-        return (_amount > d) ? (d, _amount.sub(d)) : (_amount, 0);
+        return (possibleAmount, _amount.sub(possibleAmount));
     }
 
-    bool public finalized = false;
-
-    function finalize() external onlyOwner {
-        require(!ignited && !finalized);
-
-        withdrawEther();
-        withdrawToken();
-
-        finalized = true;
+    function min(uint256 val1, uint256 val2) private returns (uint256){
+        return (val1 > val2) ? val2 : val1;
     }
-
-    event Release(address indexed _to, uint256 _amount);
-    event Refund(address indexed _to, uint256 _amount);
-    event Fail(address indexed _addr, string _reason);
 
     function release(address _addr) private returns (bool) {
         require(_addr != address(0));
@@ -213,14 +189,21 @@ contract Presale is Ownable {
         require(!ignited && !finalized);
         require(_addrs.length <= 30);
 
-        for (uint256 i = 0; i < _addrs.length; i++)
+        for (uint256 i = 0; i < _addrs.length; i++) {
             if (!refund(_addrs[i])) {
                 emit Fail(_addrs[i], "refund");
             }
+        }
     }
 
-    event WithdrawToken(address indexed _from, uint256 _amount);
-    event WithdrawEther(address indexed _from, uint256 _amount);
+    function finalize() external onlyOwner {
+        require(!ignited && !finalized);
+
+        withdrawEther();
+        withdrawToken();
+
+        finalized = true;
+    }
 
     function withdrawToken() public onlyOwner {
         require(!ignited);
@@ -237,4 +220,21 @@ contract Presale is Ownable {
         wallet.transfer(address(this).balance);
         emit WithdrawEther(wallet, address(this).balance);
     }
+
+    event Purchase(address indexed _buyer, uint256 _purchased, uint256 _refund, uint256 _tokens);
+
+    event ChangeExternalAddress(address _addr, string _name);
+    event BuyerAddressTransfer(address indexed _from, address indexed _to);
+
+    event Pause();
+    event Resume();
+    event Ignite();
+    event Extinguish();
+
+    event Release(address indexed _to, uint256 _amount);
+    event Refund(address indexed _to, uint256 _amount);
+    event Fail(address indexed _addr, string _reason);
+
+    event WithdrawToken(address indexed _from, uint256 _amount);
+    event WithdrawEther(address indexed _from, uint256 _amount);
 }
