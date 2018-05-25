@@ -5,9 +5,9 @@ import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Whitelist.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "../utils/Stateable.sol";
 
-
-contract Presale is Ownable {
+contract Presale is Stateable {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
@@ -17,15 +17,17 @@ contract Presale is Ownable {
     uint256 public minimum;
     uint256 public rate;
 
-    bool public paused;
-    bool public ignited;
-    bool public finalized;
-
     address public wallet;
     Whitelist public whiteList;
     ERC20 public token;
 
     mapping(address => uint256) public buyers;
+
+    modifier validAddress(address _account) {
+        require(_account != address(0));
+        require(_account != address(this));
+        _;
+    }
 
     constructor (
         uint256 _maxcap,
@@ -48,51 +50,41 @@ contract Presale is Ownable {
         wallet = _wallet;
         token = ERC20(_token);
         whiteList = Whitelist(_whitelist);
+
+        setState(State.Preparing);
     }
 
     function() external payable {
         collect();
     }
 
-    function setWhitelist(address _whitelist) external onlyOwner {
-        require(_whitelist != address(0));
-
+    function setWhitelist(address _whitelist) external onlyOwner validAddress(_whitelist) {
         whiteList = Whitelist(_whitelist);
         emit ChangeExternalAddress(_whitelist, "whitelist");
     }
 
-    function setWallet(address _wallet) external onlyOwner {
-        require(_wallet != address(0));
-
+    function setWallet(address _wallet) external onlyOwner validAddress(_wallet) {
         wallet = _wallet;
         emit ChangeExternalAddress(_wallet, "wallet");
     }
 
     function pause() external onlyOwner {
-        paused = true;
-        emit Pause();
+        setState(State.Pausing);
     }
 
-    function resume() external onlyOwner {
-        paused = false;
-        emit Resume();
+    function start() external onlyOwner {
+        setState(State.Starting);
     }
 
-    function ignite() external onlyOwner {
-        ignited = true;
-        emit Ignite();
-    }
-
-    function extinguish() external onlyOwner {
-        ignited = false;
-        emit Extinguish();
+    function complete() external onlyOwner {
+        setState(State.Completed);
     }
 
     function collect() public payable {
         address buyer = msg.sender;
         uint256 amount = msg.value;
 
-        require(ignited && !paused);
+        require(getState() == State.Starting);
         require(whiteList.whitelist(buyer));
         require(buyer != address(0));
         require(weiRaised < maxcap);
@@ -106,7 +98,7 @@ contract Presale is Ownable {
         weiRaised = weiRaised.add(purchase);
 
         if (weiRaised >= maxcap) {
-            ignited = false;
+            setState(State.Completed);
         }
 
         buyers[buyer] = buyers[buyer].add(purchase);
@@ -117,9 +109,7 @@ contract Presale is Ownable {
         }
     }
 
-    function buyerAddressTransfer(address _from, address _to) external onlyOwner {
-        require(_from != address(0));
-        require(_to != address(0));
+    function buyerAddressTransfer(address _from, address _to) external onlyOwner validAddress(_from) validAddress(_to) {
         require(whiteList.whitelist(_from));
         require(whiteList.whitelist(_to));
         require(buyers[_from] > 0);
@@ -143,9 +133,7 @@ contract Presale is Ownable {
         return (val1 > val2) ? val2 : val1;
     }
 
-    function release(address _addr) private returns (bool) {
-        require(_addr != address(0));
-
+    function release(address _addr) private validAddress(_addr) returns (bool) {
         if (buyers[_addr] == 0) {
             return false;
         }
@@ -160,7 +148,7 @@ contract Presale is Ownable {
     }
 
     function release(address[] _addrs) external onlyOwner {
-        require(!ignited && !finalized);
+        require(getState() == State.Completed);
         require(_addrs.length <= 30);
 
         for (uint256 i = 0; i < _addrs.length; i++)
@@ -169,9 +157,7 @@ contract Presale is Ownable {
             }
     }
 
-    function refund(address _addr) private returns (bool) {
-        require(_addr != address(0));
-
+    function refund(address _addr) private validAddress(_addr) returns (bool) {
         if (buyers[_addr] == 0) {
             return false;
         }
@@ -186,7 +172,7 @@ contract Presale is Ownable {
     }
 
     function refund(address[] _addrs) external onlyOwner {
-        require(!ignited && !finalized);
+        require(getState() == State.Completed);
         require(_addrs.length <= 30);
 
         for (uint256 i = 0; i < _addrs.length; i++) {
@@ -197,16 +183,16 @@ contract Presale is Ownable {
     }
 
     function finalize() external onlyOwner {
-        require(!ignited && !finalized);
+        require(getState() == State.Completed);
 
         withdrawEther();
         withdrawToken();
 
-        finalized = true;
+        setState(State.Finalized);
     }
 
     function withdrawToken() public onlyOwner {
-        require(!ignited);
+        require(getState() == State.Completed);
 
         if (token.balanceOf(address(this)) > 0) {
             token.safeTransfer(wallet, token.balanceOf(address(this)));
@@ -215,7 +201,7 @@ contract Presale is Ownable {
     }
 
     function withdrawEther() public onlyOwner {
-        require(!ignited);
+        require(getState() == State.Completed);
 
         wallet.transfer(address(this).balance);
         emit WithdrawEther(wallet, address(this).balance);
@@ -225,11 +211,6 @@ contract Presale is Ownable {
 
     event ChangeExternalAddress(address _addr, string _name);
     event BuyerAddressTransfer(address indexed _from, address indexed _to);
-
-    event Pause();
-    event Resume();
-    event Ignite();
-    event Extinguish();
 
     event Release(address indexed _to, uint256 _amount);
     event Refund(address indexed _to, uint256 _amount);
