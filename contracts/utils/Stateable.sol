@@ -18,7 +18,7 @@ contract Stateable is Ownable {
         emit OnStateChange(getMyEnumKeyByValue(state));
     }
 
-    function getState() internal view returns (State) {
+    function getState() public view returns (State) {
         return state;
     }
 
