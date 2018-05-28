@@ -180,8 +180,8 @@ contract Presale is Stateable {
     }
 
     function withdrawToken() public onlyOwner completed {
-        token.safeTransfer(wallet, token.balanceOf(address(this)));
-        emit WithdrawToken(wallet, token.balanceOf(address(this)));
+        token.safeTransfer(msg.sender, token.balanceOf(address(this)));
+        emit WithdrawToken(msg.sender, token.balanceOf(address(this)));
     }
 
     function withdrawEther() public onlyOwner completed {
