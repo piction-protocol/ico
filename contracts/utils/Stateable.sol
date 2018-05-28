@@ -15,14 +15,14 @@ contract Stateable is Ownable {
 
     function setState(State _state) internal onlyOwner {
         state = _state;
-        emit OnStateChange(getMyEnumKeyByValue(state));
+        emit OnStateChange(getKeyByValue(state));
     }
 
     function getState() public view returns (State) {
         return state;
     }
 
-    function getMyEnumKeyByValue(State _state) private pure returns (string) {
+    function getKeyByValue(State _state) private pure returns (string) {
         if (State.Preparing == _state) return "Preparing";
         if (State.Starting == _state) return "Starting";
         if (State.Pausing == _state) return "Pausing";
