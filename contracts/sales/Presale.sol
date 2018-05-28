@@ -102,10 +102,6 @@ contract Presale is Stateable {
 
         weiRaised = weiRaised.add(purchase);
 
-        if (weiRaised >= maxcap) {
-            setState(State.Completed);
-        }
-
         buyers[buyer] = buyers[buyer].add(purchase);
         emit Purchase(buyer, purchase, refund, purchase.mul(rate));
 
