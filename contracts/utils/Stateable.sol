@@ -22,7 +22,7 @@ contract Stateable is Ownable {
         return state;
     }
 
-    function getKeyByValue(State _state) private pure returns (string) {
+    function getKeyByValue(State _state) public pure returns (string) {
         if (State.Preparing == _state) return "Preparing";
         if (State.Starting == _state) return "Starting";
         if (State.Pausing == _state) return "Pausing";
