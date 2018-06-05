@@ -38,8 +38,17 @@ const deploy = async () => {
         arguments: [maxcap, exceed, minimum, rate, process.env.WALLET_ADDRESS, process.env.WHITELIST_ADDRESS, process.env.PXL_ADDRESS]
     })
         .send(sendDefaultParams)
-        .then(newContractInstance => {
+        .then(async newContractInstance => {
             log(`PRESALE ADDRESS : ${newContractInstance.options.address}`);
+            enquirer.register('confirm', require('prompt-confirm'));
+            enquirer.question('status', `update ${process.env.NODE_ENV} env`, {type: 'confirm'});
+            answer = await enquirer.prompt(['status']);
+            if (!answer.status) return;
+            replace({
+                files: `.env.${process.env.NODE_ENV}`,
+                from: /PRESALE_ADDRESS=.*/g,
+                to: `PRESALE_ADDRESS=${newContractInstance.options.address}`
+            })
         });
 };
 

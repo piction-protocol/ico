@@ -16,8 +16,17 @@ const deploy = async () => {
         arguments: [new BigNumber(answer.initialSupply * decimals)]
     })
         .send(sendDefaultParams)
-        .then(newContractInstance => {
+        .then(async newContractInstance => {
             log(`PXL ADDRESS : ${newContractInstance.options.address}`);
+            enquirer.register('confirm', require('prompt-confirm'));
+            enquirer.question('status', `update ${process.env.NODE_ENV} env`, {type: 'confirm'});
+            answer = await enquirer.prompt(['status']);
+            if (!answer.status) return;
+            replace({
+                files: `.env.${process.env.NODE_ENV}`,
+                from: /PXL_ADDRESS=.*/g,
+                to: `PXL_ADDRESS=${newContractInstance.options.address}`
+            })
         });
 };
 

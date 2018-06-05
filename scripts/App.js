@@ -9,6 +9,7 @@ global.chunks = require('array.chunk');
 global.Confirm = require('prompt-confirm');
 global.Enquirer = require('enquirer');
 global.colors = require('colors');
+global.replace = require('replace-in-file');
 
 global.web3 = new Web3(new Web3.providers.HttpProvider(`https://${process.env.NODE_ENV}.infura.io/`));
 web3.eth.accounts.wallet.add(process.env.PRIVATE_KEY);
