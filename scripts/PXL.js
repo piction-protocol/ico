@@ -1,7 +1,7 @@
 require('./App');
 
-const input = JSON.parse(fs.readFileSync('build/contracts/PXLG.json'));
-const contract = new web3.eth.Contract(input.abi, process.env.PXLG_ADDRESS);
+const input = JSON.parse(fs.readFileSync('build/contracts/PXL.json'));
+const contract = new web3.eth.Contract(input.abi, process.env.PXL_ADDRESS);
 const enquirer = new Enquirer();
 
 const deploy = async () => {
@@ -17,7 +17,7 @@ const deploy = async () => {
     })
         .send(sendDefaultParams)
         .then(newContractInstance => {
-            log(`PXLG ADDRESS : ${newContractInstance.options.address}`);
+            log(`PXL ADDRESS : ${newContractInstance.options.address}`);
         });
 };
 
@@ -45,13 +45,6 @@ const burn = async () => {
         .then(receipt => log(receipt));
 }
 
-const _transfer = (to, amount) => {
-    return contract.methods
-        .transfer(to, new BigNumber(amount * decimals))
-        .send(sendDefaultParams)
-        .then(receipt => log(receipt));
-}
-
 const transfer = async () => {
     enquirer.question('to', 'address');
     enquirer.question('amount', 'amount');
@@ -60,29 +53,17 @@ const transfer = async () => {
     if (answer.to == '') return;
     if (!parseInt(answer.amount) || answer.amount != answer.confirmAmount) return;
 
-    _transfer(answer.to, answer.amount)
-}
-
-const tokenRelease = async () => {
-    let enquirer = new Enquirer();
-    enquirer.question('text', 'type "tokenRelease"');
-    enquirer.question('path', 'buyers csv file path');
-    let answer = await enquirer.prompt(['text', 'path']);
-    if (answer.text != 'tokenRelease' || !answer.path) return;
-
-    let input = fs.readFileSync(answer.path);
-    parse(input, (err, output) => {
-        awaitEach(output, async function (row) {
-            log(`transfer ${to} ${amount}`);
-            return await _transfer(row[0], row[1]);
-        });
-    });
+    contract.methods
+        .transfer(answer.to, new BigNumber(answer.amount * decimals))
+        .send(sendDefaultParams)
+        .then(receipt => log(receipt));
 }
 
 const addOwner = async () => {
-    enquirer.question('address', 'PXLG add owner address');
-    let answer = await enquirer.prompt(['address']);
-    if (answer.address == '') return;
+    enquirer.question('address', 'address');
+    enquirer.question('confirmAddress', 'address (confirm)');
+    let answer = await enquirer.prompt(['address', 'confirmAddress']);
+    if (answer.address == '' || answer.address != answer.confirmAddress) return;
 
     return contract.methods
         .addOwner(answer.address)
@@ -90,20 +71,5 @@ const addOwner = async () => {
         .then(receipt => log(receipt));
 }
 
-const events = async () => {
-    enquirer.question('eventName', 'eventName');
-    let answer = await enquirer.prompt(['eventName']);
-    if (answer.eventName == '') return;
-
-    contract.getPastEvents(answer.eventName, {
-        fromBlock: 0,
-        toBlock: 'latest'
-    }, (error, events) => {
-        events.forEach(obj => {
-            console.log(obj)
-        });
-    });
-}
-
-module.exports = {deploy, mint, burn, transfer, tokenRelease, addOwner, events};
+module.exports = {deploy, mint, burn, transfer, addOwner};
 require('make-runnable')

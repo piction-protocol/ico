@@ -6,4 +6,4 @@ build
 
 # local environment files
 .env.*
-scripts/*.csv
+scripts/sources/*.csv
