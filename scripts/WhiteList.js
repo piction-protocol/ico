@@ -53,7 +53,7 @@ const _add = addrs => {
 const add = async () => {
     let enquirer = new Enquirer();
     enquirer.question('path', 'add whitelist csv file path');
-    let answer = await enquirer.prompt(['text', 'path']);
+    let answer = await enquirer.prompt(['path']);
     if (!answer.path) return;
 
     let input = fs.readFileSync(answer.path);
@@ -76,7 +76,7 @@ const _remove = addrs => {
 const remove = async () => {
     let enquirer = new Enquirer();
     enquirer.question('path', 'remove whitelist csv file path');
-    let answer = await enquirer.prompt(['text', 'path']);
+    let answer = await enquirer.prompt(['path']);
     if (!answer.path) return;
 
     let input = fs.readFileSync(answer.path);
