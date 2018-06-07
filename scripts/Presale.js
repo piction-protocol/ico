@@ -4,7 +4,11 @@ const input = JSON.parse(fs.readFileSync('build/contracts/Presale.json'));
 const contract = new web3.eth.Contract(input.abi, process.env.PRESALE_ADDRESS);
 const enquirer = new Enquirer();
 
-error(`PRESALE_ADDRESS : ${process.env.PRESALE_ADDRESS ? process.env.PRESALE_ADDRESS : 'Not registered yet!'}`);
+if (process.env.PRESALE_ADDRESS) {
+    log(`PRESALE_ADDRESS : ${process.env.PRESALE_ADDRESS}`)
+} else {
+    error('PRESALE_ADDRESS : Not registered yet!')
+}
 
 var questions = [{
     type: 'radio',

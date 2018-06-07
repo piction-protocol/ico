@@ -4,7 +4,11 @@ const input = JSON.parse(fs.readFileSync('build/contracts/Whitelist.json'));
 const contract = new web3.eth.Contract(input.abi, process.env.WHITELIST_ADDRESS);
 const enquirer = new Enquirer();
 
-error(`WHITELIST_ADDRESS : ${process.env.WHITELIST_ADDRESS ? process.env.WHITELIST_ADDRESS : 'Not registered yet!'}`);
+if (process.env.WHITELIST_ADDRESS) {
+    log(`WHITELIST_ADDRESS : ${process.env.WHITELIST_ADDRESS}`)
+} else {
+    error('WHITELIST_ADDRESS : Not registered yet!')
+}
 
 const choices = process.env.WHITELIST_ADDRESS ? ['deploy', 'add', 'remove', 'find'] : ['deploy'];
 const questions = [{

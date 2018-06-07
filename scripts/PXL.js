@@ -4,7 +4,11 @@ const input = JSON.parse(fs.readFileSync('build/contracts/PXL.json'));
 const contract = new web3.eth.Contract(input.abi, process.env.PXL_ADDRESS);
 const enquirer = new Enquirer();
 
-error(`PXL_ADDRESS : ${process.env.PXL_ADDRESS ? process.env.PXL_ADDRESS : 'Not registered yet!'}`);
+if (process.env.PXL_ADDRESS) {
+    log(`PXL_ADDRESS : ${process.env.PXL_ADDRESS}`)
+} else {
+    error('PXL_ADDRESS : Not registered yet!')
+}
 
 const choices = process.env.PXL_ADDRESS ? ['deploy', 'mint', 'burn', 'transfer', 'addOwner'] : ['deploy'];
 const questions = [{
