@@ -4,6 +4,22 @@ const input = JSON.parse(fs.readFileSync('build/contracts/PXL.json'));
 const contract = new web3.eth.Contract(input.abi, process.env.PXL_ADDRESS);
 const enquirer = new Enquirer();
 
+error(`PXL_ADDRESS : ${process.env.PXL_ADDRESS ? process.env.PXL_ADDRESS : 'Not registered yet!'}`);
+
+const choices = process.env.PXL_ADDRESS ? ['deploy', 'mint', 'burn', 'transfer', 'addOwner'] : ['deploy'];
+const questions = [{
+    type: 'radio',
+    name: 'result',
+    message: 'Which function do you want to run?',
+    choices: choices
+}];
+enquirer.register('radio', require('prompt-radio'));
+enquirer.ask(questions).then((answers) => {
+    eval(answers.result)()
+}).catch(function (err) {
+    log(err);
+});
+
 const deploy = async () => {
     enquirer.question('initialSupply', 'initialSupply');
     enquirer.question('confirmInitialSupply', 'initialSupply (confirm)');
@@ -79,6 +95,3 @@ const addOwner = async () => {
         .send(sendDefaultParams)
         .then(receipt => log(receipt));
 }
-
-module.exports = {deploy, mint, burn, transfer, addOwner};
-require('make-runnable')

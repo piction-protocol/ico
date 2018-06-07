@@ -2,6 +2,21 @@ require('./App');
 
 const input = JSON.parse(fs.readFileSync('build/contracts/Presale.json'));
 const contract = new web3.eth.Contract(input.abi, process.env.PRESALE_ADDRESS);
+const enquirer = new Enquirer();
+
+error(`PRESALE_ADDRESS : ${process.env.PRESALE_ADDRESS ? process.env.PRESALE_ADDRESS : 'Not registered yet!'}`);
+
+var questions = [{
+    type: 'radio',
+    name: 'result',
+    message: 'Which function do you want to run?',
+    choices: ['deploy', 'getState', 'pause', 'start', 'complete', 'release', 'refund', 'finalize', 'withdrawToken', 'withdrawEther']
+}];
+
+enquirer.register('radio', require('prompt-radio'));
+enquirer.ask(questions)
+    .then((answers) => eval(answers.result)())
+    .catch((err) => log(err));
 
 const deploy = async () => {
     if (!process.env.WALLET_ADDRESS) {
@@ -180,6 +195,3 @@ const withdrawEther = async () => {
         .send(sendDefaultParams)
         .then(receipt => log(receipt));
 }
-
-module.exports = {deploy, getState, pause, start, complete, release, refund, finalize, withdrawToken, withdrawEther};
-require('make-runnable')

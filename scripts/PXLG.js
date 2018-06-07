@@ -4,6 +4,20 @@ const input = JSON.parse(fs.readFileSync('build/contracts/PXLG.json'));
 const contract = new web3.eth.Contract(input.abi, process.env.PXLG_ADDRESS);
 const enquirer = new Enquirer();
 
+error(`PXLG_ADDRESS : ${process.env.PXLG_ADDRESS ? process.env.PXLG_ADDRESS : 'Not registered yet!'}`);
+
+const choices = process.env.PXLG_ADDRESS ? ['deploy', 'mint', 'burn', 'transfer', 'tokenRelease', 'addOwner', 'events'] : ['deploy'];
+const questions = [{
+    type: 'radio',
+    name: 'result',
+    message: 'Which function do you want to run?',
+    choices: choices
+}];
+enquirer.register('radio', require('prompt-radio'));
+enquirer.ask(questions)
+    .then((answers) => eval(answers.result)())
+    .catch((err) => log(err));
+
 const deploy = async () => {
     enquirer.question('initialSupply', 'initialSupply');
     enquirer.question('confirmInitialSupply', 'initialSupply (confirm)');
@@ -113,6 +127,3 @@ const events = async () => {
         });
     });
 }
-
-module.exports = {deploy, mint, burn, transfer, tokenRelease, addOwner, events};
-require('make-runnable')

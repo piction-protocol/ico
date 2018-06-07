@@ -2,6 +2,21 @@ require('./App');
 
 const input = JSON.parse(fs.readFileSync('build/contracts/Whitelist.json'));
 const contract = new web3.eth.Contract(input.abi, process.env.WHITELIST_ADDRESS);
+const enquirer = new Enquirer();
+
+error(`WHITELIST_ADDRESS : ${process.env.WHITELIST_ADDRESS ? process.env.WHITELIST_ADDRESS : 'Not registered yet!'}`);
+
+const choices = process.env.WHITELIST_ADDRESS ? ['deploy', 'add', 'remove', 'find'] : ['deploy'];
+const questions = [{
+    type: 'radio',
+    name: 'result',
+    message: 'Which function do you want to run?',
+    choices: choices
+}];
+enquirer.register('radio', require('prompt-radio'));
+enquirer.ask(questions)
+    .then((answers) => eval(answers.result)())
+    .catch((err) => log(err));
 
 const deploy = () => {
     let contract = new web3.eth.Contract(input.abi);
@@ -78,6 +93,3 @@ const find = addr => {
             log(`whitelist => ${addr} ${result}`)
         });
 }
-
-module.exports = {deploy, add, remove, find};
-require('make-runnable')
