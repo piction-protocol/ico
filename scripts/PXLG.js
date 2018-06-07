@@ -100,7 +100,7 @@ const tokenRelease = async () => {
     let input = fs.readFileSync(answer.path);
     parse(input, (err, output) => {
         awaitEach(output, async function (row) {
-            log(`transfer ${to} ${amount}`);
+            log(`transfer ${row[0]} ${row[1]}`);
             return await _transfer(row[0], row[1]);
         });
     });
