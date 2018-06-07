@@ -36,25 +36,26 @@ const deploy = async () => {
         return;
     }
     let enquirer = new Enquirer();
-    enquirer.question('maxcap', 'maxcap(ETH)');
-    enquirer.question('exceed', 'exceed(ETH)');
-    enquirer.question('minimum', 'minimum(ETH)');
-    enquirer.question('rate', 'rate');
-    let answer = await enquirer.prompt(['maxcap', 'exceed', 'minimum', 'rate']);
-    if (!parseInt(answer.maxcap) || !parseInt(answer.exceed) || !parseInt(answer.minimum) || !parseInt(answer.rate)) return;
-
-    enquirer = new Enquirer();
     enquirer.register('confirm', require('prompt-confirm'));
     enquirer.question('confirmWalletAddress', `confirm WALLET_ADDRESS : ${process.env.WALLET_ADDRESS}`, {type: 'confirm'});
     enquirer.question('confirmWhitelistAddress', `confirm WHITELIST_ADDRESS : ${process.env.WHITELIST_ADDRESS}`, {type: 'confirm'});
     enquirer.question('confirmPXLAddress', `confirm PXL_ADDRESS : ${process.env.PXL_ADDRESS}`, {type: 'confirm'});
-    answer = await enquirer.prompt(['confirmWalletAddress', 'confirmWhitelistAddress', 'confirmPXLAddress']);
+    let answer = await enquirer.prompt(['confirmWalletAddress', 'confirmWhitelistAddress', 'confirmPXLAddress']);
     if (!answer.confirmWalletAddress || !answer.confirmWhitelistAddress || !answer.confirmPXLAddress) return;
+
+    enquirer = new Enquirer();
+    enquirer.question('maxcap', 'maxcap(ETH)');
+    enquirer.question('exceed', 'exceed(ETH)');
+    enquirer.question('minimum', 'minimum(ETH)');
+    enquirer.question('rate', 'rate');
+    answer = await enquirer.prompt(['maxcap', 'exceed', 'minimum', 'rate']);
+    if (!parseInt(answer.maxcap) || !parseInt(answer.exceed) || !parseInt(answer.minimum) || !parseInt(answer.rate)) return;
 
     let contract = new web3.eth.Contract(input.abi);
     contract.deploy({
         data: input.bytecode,
-        arguments: [answer.maxcap, answer.exceed, answer.minimum, answer.rate, process.env.WALLET_ADDRESS, process.env.WHITELIST_ADDRESS, process.env.PXL_ADDRESS]
+        arguments: [answer.maxcap, answer.exceed, answer.minimum, answer.rate,
+            process.env.WALLET_ADDRESS, process.env.WHITELIST_ADDRESS, process.env.PXL_ADDRESS]
     })
         .send(sendDefaultParams)
         .then(async newContractInstance => {
