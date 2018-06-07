@@ -85,7 +85,7 @@ contract Presale is Stateable {
         _;
     }
 
-    function collect() public payable {
+    function collect() private {
         address buyer = msg.sender;
         uint256 amount = msg.value;
 
