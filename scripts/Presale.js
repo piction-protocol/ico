@@ -10,7 +10,7 @@ if (process.env.PRESALE_ADDRESS) {
     error('PRESALE_ADDRESS : Not registered yet!')
 }
 
-const choices = process.env.WHITELIST_ADDRESS ? ['deploy', 'getState', 'pause', 'start', 'complete', 'release', 'refund', 'finalize', 'withdrawToken', 'withdrawEther'] : ['deploy'];
+const choices = process.env.PRESALE_ADDRESS ? ['deploy', 'getState', 'pause', 'start', 'complete', 'release', 'refund', 'finalize', 'withdrawToken', 'withdrawEther'] : ['deploy'];
 const questions = [{
     type: 'radio',
     name: 'result',
