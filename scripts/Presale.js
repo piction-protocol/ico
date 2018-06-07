@@ -10,13 +10,13 @@ if (process.env.PRESALE_ADDRESS) {
     error('PRESALE_ADDRESS : Not registered yet!')
 }
 
-var questions = [{
+const choices = process.env.WHITELIST_ADDRESS ? ['deploy', 'getState', 'pause', 'start', 'complete', 'release', 'refund', 'finalize', 'withdrawToken', 'withdrawEther'] : ['deploy'];
+const questions = [{
     type: 'radio',
     name: 'result',
     message: 'Which function do you want to run?',
-    choices: ['deploy', 'getState', 'pause', 'start', 'complete', 'release', 'refund', 'finalize', 'withdrawToken', 'withdrawEther']
+    choices: choices
 }];
-
 enquirer.register('radio', require('prompt-radio'));
 enquirer.ask(questions)
     .then((answers) => eval(answers.result)())
