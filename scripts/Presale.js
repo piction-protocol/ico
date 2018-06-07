@@ -54,7 +54,11 @@ const deploy = async () => {
     let contract = new web3.eth.Contract(input.abi);
     contract.deploy({
         data: input.bytecode,
-        arguments: [answer.maxcap, answer.exceed, answer.minimum, answer.rate,
+        arguments: [
+            new BigNumber(answer.maxcap * decimals),
+            new BigNumber(answer.exceed * decimals),
+            new BigNumber(answer.minimum * decimals),
+            answer.rate,
             process.env.WALLET_ADDRESS, process.env.WHITELIST_ADDRESS, process.env.PXL_ADDRESS]
     })
         .send(sendDefaultParams)
