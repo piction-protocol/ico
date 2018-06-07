@@ -32,7 +32,7 @@ const deploy = async () => {
         return;
     }
     if (!process.env.PXL_ADDRESS) {
-        error('WHITELIST_ADDRESS is not registered. Please .env.{network} file update!')
+        error('PXL_ADDRESS is not registered. Please .env.{network} file update!')
         return;
     }
     let enquirer = new Enquirer();
