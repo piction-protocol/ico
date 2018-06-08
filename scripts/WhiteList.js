@@ -53,13 +53,18 @@ const _add = addrs => {
 const add = async () => {
     let enquirer = new Enquirer();
     enquirer.question('path', 'add whitelist csv file path');
-    let answer = await enquirer.prompt(['path']);
+    enquirer.question('chunks', 'chunks');
+    let answer = await enquirer.prompt(['path', 'chunks']);
     if (!answer.path) return;
+    if (!parseInt(answer.chunks) || parseInt(answer.chunks) > 30) {
+        error('Chunk size can not be greater than 30.')
+        return;
+    }
 
     let input = fs.readFileSync(answer.path);
     parse(input, {}, (err, output) => {
         let addrs = output.map((obj) => obj[0]);
-        let chunkAddrs = chunks(addrs, 2)
+        let chunkAddrs = chunks(addrs, parseInt(answer.chunks))
         awaitEach(chunkAddrs, async function (row) {
             await _add(row)
         });
@@ -76,13 +81,18 @@ const _remove = addrs => {
 const remove = async () => {
     let enquirer = new Enquirer();
     enquirer.question('path', 'remove whitelist csv file path');
-    let answer = await enquirer.prompt(['path']);
+    enquirer.question('chunks', 'chunks');
+    let answer = await enquirer.prompt(['path', 'chunks']);
     if (!answer.path) return;
+    if (!parseInt(answer.chunks) || parseInt(answer.chunks) > 30) {
+        error('Chunk size can not be greater than 30.')
+        return;
+    }
 
     let input = fs.readFileSync(answer.path);
     parse(input, {}, (err, output) => {
         let addrs = output.map((obj) => obj[0]);
-        let chunkAddrs = chunks(addrs, 2)
+        let chunkAddrs = chunks(addrs, parseInt(answer.chunks))
         awaitEach(chunkAddrs, async function (row) {
             await _remove(row)
         });

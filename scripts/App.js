@@ -12,8 +12,9 @@ global.colors = require('colors');
 global.replace = require('replace-in-file');
 global.web3 = new Web3(new Web3.providers.HttpProvider(`https://${process.env.NODE_ENV}.infura.io/`));
 
-global.log = (message) => console.log(colors.green.bold(message))
-global.error = (message) => console.log(colors.red.bold(message))
+global.log = (message) => console.log(colors.green.bold(message));
+global.error = (message) => console.log(colors.red.bold(message));
+global.ether = (value) => new BigNumber(value * decimals);
 
 if (process.env.PRIVATE_KEY) {
     web3.eth.accounts.wallet.add(process.env.PRIVATE_KEY);

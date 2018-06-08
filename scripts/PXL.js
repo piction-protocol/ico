@@ -18,11 +18,9 @@ const questions = [{
     choices: choices
 }];
 enquirer.register('radio', require('prompt-radio'));
-enquirer.ask(questions).then((answers) => {
-    eval(answers.result)()
-}).catch(function (err) {
-    log(err);
-});
+enquirer.ask(questions)
+    .then((answers) => eval(answers.result)())
+    .catch((err) => log(err));
 
 const deploy = async () => {
     enquirer.question('initialSupply', 'initialSupply');

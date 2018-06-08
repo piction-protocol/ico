@@ -54,11 +54,7 @@ const deploy = async () => {
     let contract = new web3.eth.Contract(input.abi);
     contract.deploy({
         data: input.bytecode,
-        arguments: [
-            new BigNumber(answer.maxcap * decimals),
-            new BigNumber(answer.exceed * decimals),
-            new BigNumber(answer.minimum * decimals),
-            answer.rate,
+        arguments: [ether(answer.maxcap), ether(answer.exceed), ether(answer.minimum), answer.rate,
             process.env.WALLET_ADDRESS, process.env.WHITELIST_ADDRESS, process.env.PXL_ADDRESS]
     })
         .send(sendDefaultParams)
@@ -132,13 +128,18 @@ const release = async () => {
     let enquirer = new Enquirer();
     enquirer.question('text', 'type "release"');
     enquirer.question('path', 'buyers csv file path');
-    let answer = await enquirer.prompt(['text', 'path']);
+    enquirer.question('chunks', 'chunks');
+    let answer = await enquirer.prompt(['text', 'path', 'chunks']);
     if (answer.text != 'release' || !answer.path) return;
+    if (!parseInt(answer.chunks) || parseInt(answer.chunks) > 30) {
+        error('Chunk size can not be greater than 30.')
+        return;
+    }
 
     let input = fs.readFileSync(answer.path);
     parse(input, {}, (err, output) => {
         let addrs = output.map((obj) => obj[0]);
-        let chunkAddrs = chunks(addrs, 2)
+        let chunkAddrs = chunks(addrs, parseInt(answer.chunks))
         awaitEach(chunkAddrs, async function (row) {
             await _release(row)
         });
