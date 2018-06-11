@@ -100,8 +100,20 @@ const tokenRelease = async () => {
     let input = fs.readFileSync(answer.path);
     parse(input, (err, output) => {
         awaitEach(output, async function (row) {
-            log(`transfer ${row[0]} ${row[1]}`);
-            return await _transfer(row[0], row[1]);
+            let balance = await contract.methods
+                .balanceOf(row[0])
+                .call(sendDefaultParams) / decimals
+
+            let enquirer = new Enquirer();
+            enquirer.register('confirm', require('prompt-confirm'));
+            enquirer.question('transfer', `${row[0]} token balanceOf ${balance}, Do you really want to send ${row[1]} PXLG?`, {type: 'confirm'});
+            let answer = await enquirer.prompt(['transfer']);
+            if (answer.transfer) {
+                log(`transfer ${row[0]} ${row[1]}`);
+                return await _transfer(row[0], row[1]);
+            } else {
+                return null;
+            }
         });
     });
 }
@@ -122,12 +134,5 @@ const events = async () => {
     let answer = await enquirer.prompt(['eventName']);
     if (answer.eventName == '') return;
 
-    contract.getPastEvents(answer.eventName, {
-        fromBlock: 0,
-        toBlock: 'latest'
-    }, (error, events) => {
-        events.forEach(obj => {
-            console.log(obj)
-        });
-    });
+    contract.getPastEvents(answer.eventName, {fromBlock: 0, toBlock: 'latest'}, (error, events) => log(events));
 }
