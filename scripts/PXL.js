@@ -26,7 +26,7 @@ const deploy = async () => {
     enquirer.question('initialSupply', 'initialSupply');
     enquirer.question('confirmInitialSupply', 'initialSupply (confirm)');
     let answer = await enquirer.prompt(['initialSupply', 'confirmInitialSupply']);
-    if (!parseInt(answer.initialSupply) || answer.initialSupply != answer.confirmInitialSupply) return;
+    if (!Number(answer.initialSupply) || answer.initialSupply != answer.confirmInitialSupply) return;
 
     let contract = new web3.eth.Contract(input.abi);
     contract.deploy({
@@ -52,7 +52,7 @@ const mint = async () => {
     enquirer.question('amount', 'amount');
     enquirer.question('confirmAmount', 'amount (confirm)');
     let answer = await enquirer.prompt(['amount', 'confirmAmount']);
-    if (!parseInt(answer.amount) || answer.amount != answer.confirmAmount) return;
+    if (!Number(answer.amount) || answer.amount != answer.confirmAmount) return;
 
     contract.methods
         .mint(new BigNumber(answer.amount * decimals))
@@ -64,7 +64,7 @@ const burn = async () => {
     enquirer.question('amount', 'amount');
     enquirer.question('confirmAmount', 'amount (confirm)');
     let answer = await enquirer.prompt(['amount', 'confirmAmount']);
-    if (!parseInt(answer.amount) || answer.amount != answer.confirmAmount) return;
+    if (!Number(answer.amount) || answer.amount != answer.confirmAmount) return;
 
     contract.methods
         .burn(new BigNumber(answer.amount * decimals))
@@ -78,7 +78,7 @@ const transfer = async () => {
     enquirer.question('confirmAmount', 'amount (confirm)');
     let answer = await enquirer.prompt(['to', 'amount', 'confirmAmount']);
     if (answer.to == '') return;
-    if (!parseInt(answer.amount) || answer.amount != answer.confirmAmount) return;
+    if (!Number(answer.amount) || answer.amount != answer.confirmAmount) return;
 
     contract.methods
         .transfer(answer.to, new BigNumber(answer.amount * decimals))

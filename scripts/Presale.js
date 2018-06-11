@@ -49,7 +49,7 @@ const deploy = async () => {
     enquirer.question('minimum', 'minimum(ETH)');
     enquirer.question('rate', 'rate');
     answer = await enquirer.prompt(['maxcap', 'exceed', 'minimum', 'rate']);
-    if (!parseInt(answer.maxcap) || !parseInt(answer.exceed) || !parseInt(answer.minimum) || !parseInt(answer.rate)) return;
+    if (!Number(answer.maxcap) || !Number(answer.exceed) || !Number(answer.minimum) || !Number(answer.rate)) return;
 
     let contract = new web3.eth.Contract(input.abi);
     contract.deploy({
